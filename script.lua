@@ -1566,3 +1566,88 @@ if LocalPlayer.Character then setupChar(LocalPlayer.Character) end
 print("K7 HUB v4 + FLOAT (FIXED) - Loaded! Press U to toggle UI")
 print("✓ Float optimizations: mass caching, better PID tuning, deadzone reduction")
 print("✓ Float config save/load FIXED!")
+
+-- [[ سكربت اختصار وقت E - نسخة خيال V12 المحدثة ]] --
+local UIS = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Active = false
+
+-- 1. إنشاء واجهة الحالة
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 150, 0, 35)
+Main.Position = UDim2.new(0.5, -75, 0.02, 0)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Main.BorderSizePixel = 2
+Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
+Instance.new("UICorner", Main)
+
+local Label = Instance.new("TextLabel", Main)
+Label.Size = UDim2.new(1, 0, 1, 0)
+Label.Text = " خيال (R)"
+Label.TextColor3 = Color3.fromRGB(255, 0, 0)
+Label.Font = Enum.Font.GothamBold
+Label.TextSize = 12
+Label.BackgroundTransparency = 1
+
+-- [[ الإضافة الجديدة: خط التحميل ]] --
+local BarContainer = Instance.new("Frame", Main)
+BarContainer.Size = UDim2.new(1, 0, 0, 4)
+BarContainer.Position = UDim2.new(0, 0, 1, 5) -- تحت المربع بـ 5 بيكسل
+BarContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+BarContainer.BorderSizePixel = 0
+BarContainer.Visible = false
+Instance.new("UICorner", BarContainer)
+
+local ProgressLine = Instance.new("Frame", BarContainer)
+ProgressLine.Size = UDim2.new(0, 0, 1, 0)
+ProgressLine.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- لون الخط أخضر
+ProgressLine.BorderSizePixel = 0
+Instance.new("UICorner", ProgressLine)
+
+-- 2. وظيفة التعديل
+local function FastE()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("ProximityPrompt") and v.KeyboardKeyCode == Enum.KeyCode.E then
+            local txt = (v.ActionText .. v.ObjectText):lower()
+            if not txt:find("sell") and not txt:find("بيع") then
+                v.HoldDuration = 0
+            end
+        end
+    end
+end
+
+-- 3. زر التشغيل والإيقاف (حرف R) مع تفعيل الخط
+UIS.InputBegan:Connect(function(input, chat)
+    if chat then return end
+    if input.KeyCode == Enum.KeyCode.R then
+        Active = not Active
+        if Active then
+            Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
+            Label.Text = " خيال ACTIVE ✅"
+            Label.TextColor3 = Color3.fromRGB(0, 255, 0)
+            BarContainer.Visible = true
+        else
+            Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
+            Label.Text = " خيال (R)"
+            Label.TextColor3 = Color3.fromRGB(255, 0, 0)
+            BarContainer.Visible = false
+        end
+    end
+end)
+
+-- 4. حلقة التحديث والتحريك (0.31 ثانية)
+task.spawn(function()
+    while true do
+        if Active then
+            -- تحريك الخط
+            ProgressLine.Size = UDim2.new(0, 0, 1, 0)
+            ProgressLine:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Linear", 0.31)
+            
+            FastE()
+        end
+        task.wait(0.28) -- التجديد كل 0.31 ثانية
+    end
+end)
+
+print("✅ تم التحديث! الخط يظهر الآن تحت القائمة عند التفعيل.")
